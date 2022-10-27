@@ -11,5 +11,5 @@ public:
     std::vector<std::string>* GetAllWords();
 
 private:
-    std::map<std::string, std::set<std::string>> mItems;
+    std::unordered_map<std::string, std::set<std::string>> mItems;
 };

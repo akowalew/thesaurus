@@ -3,7 +3,10 @@
 static void
 AssertVectorsEqualCheck(std::vector<std::string>* A, std::vector<std::string> B, char* File, int Line, char* AExpr, char* BExpr)
 {
-    if(*A != B)
+    std::set<std::string> AA = {A->begin(), A->end()};
+    std::set<std::string> BB = {B.begin(), B.end()};
+    if(A->size() != B.size() ||
+       AA != BB)
     {
         fprintf(stderr, "Assert failed at %s:%d - Vectors '%s' and '%s' are not equal\n", File, Line, AExpr, BExpr);
 
