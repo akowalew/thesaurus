@@ -6,8 +6,10 @@ public:
     CThesaurus();
     ~CThesaurus();
 
-    bool AddSynonyms(const char* Synonyms);
-    char* GetSynonyms(const char* Word);
-    char** GetSynonyms(const char* Word, int* Count);
-    char* GetAllWords();
+    void AddSynonyms(std::vector<std::string>* Synonyms);
+    std::vector<std::string>* GetSynonyms(std::string Word);
+    std::vector<std::string>* GetAllWords();
+
+private:
+    std::map<std::string, std::set<std::string>> mItems;
 };

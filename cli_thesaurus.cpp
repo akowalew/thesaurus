@@ -1,6 +1,4 @@
 #include "common.cpp"
-#include "CThesaurus.hpp"
-#include "CThesaurus.cpp"
 
 static bool
 IsAlpha(char C)
@@ -36,14 +34,21 @@ main(int Argc, char** Argv)
 
     CThesaurus Thesaurus;
 
+    static char Buffer[4096];
+
     while(1)
     {
         printf("> ");
 
-        static char Command[4096];
-        if(!fgets(Command, sizeof(Command), stdin))
+        if(!fgets(Buffer, sizeof(Buffer), stdin))
         {
             break;
+        }
+
+        char* Command = strtok(Buffer, "\r\n");
+        if(!Command)
+        {
+            continue;
         }
 
         char C = Command[0];
@@ -56,57 +61,96 @@ main(int Argc, char** Argv)
 
             case '*':
             {
-                char* AllWords = Thesaurus.GetAllWords();
-                puts(AllWords);
+                std::vector<std::string>* AllWords = Thesaurus.GetAllWords();
+                if(AllWords->empty())
+                {
+                    puts("No words yet");
+                }
+                else
+                {
+                    for(std::string& Word : *AllWords)
+                    {
+                        puts(Word.c_str());
+                    }
+                }
+
+                delete AllWords;
             } break;
 
             case '+':
             {
-                char* Synonyms = &Command[1];
-                if(Thesaurus.AddSynonyms(Synonyms))
+                std::vector<std::string> Synonyms;
+
+                if(Command[1])
                 {
-                    printf("OK\n");
+                    static const char Delimiters[] = " ,.-\t\v";
+                    char* Word = strtok(&Command[1], Delimiters);
+                    while(Word)
+                    {
+                        Synonyms.push_back(Word);
+
+                        Word = strtok(0, Delimiters);
+                    }
                 }
                 else
                 {
-                    printf("FAIL\n");
+                    while(1)
+                    {
+                        printf("+");
+
+                        if(!fgets(Buffer, sizeof(Buffer), stdin))
+                        {
+                            break;
+                        }
+
+                        char* Word = strtok(Buffer, "\r\n");
+                        if(!Word)
+                        {
+                            break;
+                        }
+
+                        Synonyms.push_back(Word);
+                    }
                 }
+
+                Thesaurus.AddSynonyms(&Synonyms);
             } break;
 
             default:
             {
                 if(IsAlpha(C))
                 {
-                    char* Word = Command;
-
-                    int SynonymsCount;
-                    char** Synonyms = Thesaurus.GetSynonyms(Word, &SynonymsCount);
-
-                    if(SynonymsCount)
+                    std::vector<std::string>* Synonyms = Thesaurus.GetSynonyms(Command);
+                    if(Synonyms)
                     {
-                        printf("%s", Synonyms[0]);
-                        for(int Idx = 1;
-                            Idx < SynonymsCount;
-                            Idx++)
+                        if(Synonyms->empty())
                         {
-                            printf(", %s", Synonyms[Idx]);
+                            puts("There are no synonyms for given word");
                         }
-                        putchar('\n');
+                        else
+                        {
+                            for(auto& Synonym : *Synonyms)
+                            {
+                                puts(Synonym.c_str());
+                            }
+                        }
+
+                        delete Synonyms;
                     }
                     else
                     {
-                        printf("No synonyms for given word\n");
+                        puts("Word not found");
                     }
                 }
-                else if(C != '\n')
+                else
                 {
-                    printf("Error: invalid command\n");
+                    puts("Error: invalid command");
                 }
             } break;
         }
     }
 
-    printf("Bye!\n");
+    puts("Bye!");
 
     return EXIT_SUCCESS;
 }

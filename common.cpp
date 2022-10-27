@@ -1,5 +1,13 @@
+#define _CRT_SECURE_NO_WARNINGS
 #include <stdlib.h>
 #include <stdio.h>
+#include <string>
+#include <vector>
+#include <map>
+#include <algorithm>
+#include <set>
+#include "CThesaurus.hpp"
+#include "CThesaurus.cpp"
 
 #define ArrayLength(x) (sizeof(x)/sizeof((x)[0]))
 
@@ -11,5 +19,14 @@ AssertFailed(const char* File, int Line, const char* Expression)
     *(int*)(0) = 0;
 }
 
-#define Assert(x) if(!(x)) { AssertFailed(__FILE__, __LINE__, #x); }
+static void
+AssertCheck(bool Result, const char* File, int Line, const char* Expression)
+{
+    if(!Result)
+    {
+        AssertFailed(File, Line, Expression);
+    }
+}
+
+#define Assert(x) AssertCheck((x), __FILE__, __LINE__, #x)
 
