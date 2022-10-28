@@ -55,7 +55,8 @@ CThesaurus::AddSynonyms(std::vector<std::string>* Synonyms)
             if(LeftIdx != RightIdx)
             {
                 std::string& RightWord = (*Synonyms)[RightIdx];
-                if(LeftWord != RightWord)
+                if(LeftWord != RightWord &&
+                   LeftSynonymsSet.count(RightWord) == 0)
                 {
                     std::set<std::string>& RightSynonymsSet = mItems[RightWord];
                     std::vector<std::string> RightSynonymsVector = {RightSynonymsSet.begin(), RightSynonymsSet.end()};
