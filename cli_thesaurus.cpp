@@ -196,7 +196,7 @@ main(int Argc, char** Argv)
                 if(Command[1])
                 {
                     char* FileName = &Command[1];
-                    if(Thesaurus.ImportFromWordNetJsonL(FileName))
+                    if(Thesaurus.ImportFromWordNetJson(FileName))
                     {
                         puts("OK");
                     }

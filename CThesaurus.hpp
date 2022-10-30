@@ -1,5 +1,13 @@
 #pragma once
 
+struct string_less
+{
+    bool operator()(char* Left, char* Right) const
+    {
+        return (strcmp(Left, Right) < 0);
+    }
+};
+
 class CThesaurus
 {
 public:
@@ -14,7 +22,7 @@ public:
     std::vector<std::string>* GetSynonyms(std::string Word);
     std::vector<std::string>* GetAllWords();
 
-    bool ImportFromWordNetJsonL(char* FileName);
+    bool ImportFromWordNetJson(char* FileName);
 
     bool LoadFromBuffer(void* Data, size_t Size);
     bool SaveToBuffer(void* Data, size_t Size, size_t* BytesWritten);
@@ -23,5 +31,7 @@ public:
     bool SaveToFile(char* FileName);
 
 private:
-    std::unordered_map<std::string, std::set<std::string>> mItems;
+    char* FindOrCreateWord(char* Word);
+
+    std::map<char*, std::set<char*>, string_less> mItems;
 };
