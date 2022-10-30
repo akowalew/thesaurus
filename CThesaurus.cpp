@@ -45,6 +45,7 @@ CThesaurus::AddSynonymsRaw(char** Synonyms, size_t Count)
         ConvertStringToLowerCase(Synonyms[Idx]);
     }
 
+#ifdef SYNONYM_OF_ANOTHER_SYNONYM_IS_ALSO_A_SYNONYM_NOOOOO
     char* LeftWord = FindOrCreateWord(Synonyms[0]);
 
     for(size_t Idx = 1;
@@ -59,6 +60,7 @@ CThesaurus::AddSynonymsRaw(char** Synonyms, size_t Count)
         }
 
         char* RightWord = FindOrCreateWord(RightQuery);
+
         std::vector<char*>& RightSynonyms = mItems[RightWord];
         auto RightSize = RightSynonyms.size();
 
@@ -107,6 +109,47 @@ CThesaurus::AddSynonymsRaw(char** Synonyms, size_t Count)
         LeftSynonyms[LeftSize] = RightWord;
         memcpy(&LeftSynonyms[LeftSize+1], &RightSynonyms[0], RightSize*sizeof(char*));
     }
+#else
+    for(size_t LeftIdx = 0;
+        LeftIdx < Count;
+        LeftIdx++)
+    {
+        char* LeftQuery = Synonyms[LeftIdx];
+        char* LeftWord = FindOrCreateWord(LeftQuery);
+
+        for(size_t RightIdx = 0;
+            RightIdx < Count;
+            RightIdx++)
+        {
+            if(LeftIdx == RightIdx)
+            {
+                continue;
+            }
+
+            char* RightQuery = Synonyms[RightIdx];
+
+            if(strcmp(LeftQuery, RightQuery) == 0)
+            {
+                continue;
+            }
+
+            char* RightWord = FindOrCreateWord(RightQuery);
+
+            std::vector<char*>& LeftSynonyms = mItems[LeftWord];
+
+            if(std::count(LeftSynonyms.begin(), LeftSynonyms.end(), RightWord))
+            {
+                continue;
+            }
+
+            LeftSynonyms.push_back(RightWord);
+
+            std::vector<char*>& RightSynonyms = mItems[RightWord];
+
+            RightSynonyms.push_back(LeftWord);
+        }
+    }
+#endif
 }
 
 void

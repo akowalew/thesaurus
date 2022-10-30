@@ -119,13 +119,13 @@ int main(int Argc, char** Argv)
 
         AssertVectorsEqual(Thesaurus.GetAllWords(), std::vector<std::string>({"excellent", "extra", "fabolous", "good", "great", "nice"}));
 
-        AssertVectorsEqual(Thesaurus.GetSynonyms("good"), std::vector<std::string>({"excellent", "extra", "fabolous", "great", "nice"}));
-        AssertVectorsEqual(Thesaurus.GetSynonyms("great"), std::vector<std::string>({"excellent", "extra", "fabolous", "good", "nice"}));
-        AssertVectorsEqual(Thesaurus.GetSynonyms("fabolous"), std::vector<std::string>({"excellent", "extra", "good", "great", "nice"}));
+        AssertVectorsEqual(Thesaurus.GetSynonyms("good"), std::vector<std::string>({"great", "fabolous", "nice"}));
+        AssertVectorsEqual(Thesaurus.GetSynonyms("great"), std::vector<std::string>({"fabolous", "good"}));
+        AssertVectorsEqual(Thesaurus.GetSynonyms("fabolous"), std::vector<std::string>({"good", "great"}));
 
-        AssertVectorsEqual(Thesaurus.GetSynonyms("nice"), std::vector<std::string>({"excellent", "extra", "fabolous", "good", "great"}));
-        AssertVectorsEqual(Thesaurus.GetSynonyms("extra"), std::vector<std::string>({"excellent", "fabolous", "good", "great", "nice"}));
-        AssertVectorsEqual(Thesaurus.GetSynonyms("excellent"), std::vector<std::string>({"extra", "fabolous", "good", "great", "nice"}));
+        AssertVectorsEqual(Thesaurus.GetSynonyms("nice"), std::vector<std::string>({"extra", "excellent", "good"}));
+        AssertVectorsEqual(Thesaurus.GetSynonyms("extra"), std::vector<std::string>({"excellent", "nice"}));
+        AssertVectorsEqual(Thesaurus.GetSynonyms("excellent"), std::vector<std::string>({"nice", "extra"}));
     }
 
     puts("Test passed");
