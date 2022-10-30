@@ -212,7 +212,7 @@ main(int Argc, char** Argv)
                     auto stop = std::chrono::steady_clock::now();
                     printf("Operation took %lld seconds\n", std::chrono::duration_cast<std::chrono::seconds>(stop - start).count());
                 }
-            }
+            } break;
 
             default:
             {

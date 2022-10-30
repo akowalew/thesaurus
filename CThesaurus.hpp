@@ -33,5 +33,7 @@ public:
 private:
     char* FindOrCreateWord(char* Word);
 
-    std::map<char*, std::vector<char*>, string_less> mItems;
+    using dictionary = std::map<char*, std::vector<char*>, string_less>;
+
+    dictionary mItems;
 };
