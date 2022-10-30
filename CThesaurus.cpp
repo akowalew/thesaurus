@@ -31,6 +31,11 @@ CThesaurus::FindOrCreateWord(char* Word)
 void
 CThesaurus::AddSynonymsRaw(char** Synonyms, size_t Count)
 {
+    if(Count == 0)
+    {
+        return;
+    }
+
     for(size_t Idx = 0;
         Idx < Count;
         Idx++)
@@ -40,79 +45,72 @@ CThesaurus::AddSynonymsRaw(char** Synonyms, size_t Count)
         ConvertStringToLowerCase(Synonyms[Idx]);
     }
 
-    for(size_t LeftIdx = 0;
-        LeftIdx < Count;
-        LeftIdx++)
+    char* LeftWord = FindOrCreateWord(Synonyms[0]);
+
+    for(size_t Idx = 1;
+        Idx < Count;
+        Idx++)
     {
-        char* LeftWord = FindOrCreateWord(Synonyms[LeftIdx]);
-        std::set<char*>& LeftSynonymsSet = mItems[LeftWord];
+        char* RightQuery = Synonyms[Idx];
 
-        bool LeftSynonymsVectorFilled = false;
-        std::vector<char*> LeftSynonymsVector;
-
-        for(size_t RightIdx = 0;
-            RightIdx < Count;
-            RightIdx++)
+        if(strcmp(LeftWord, RightQuery) == 0)
         {
-            if(LeftIdx != RightIdx)
+            continue;
+        }
+
+        char* RightWord = FindOrCreateWord(RightQuery);
+
+        std::set<char*>& LeftSynonyms = mItems[LeftWord];
+        std::set<char*>& RightSynonyms = mItems[RightWord];
+
+        if(LeftSynonyms.count(RightWord))
+        {
+            continue;
+        }
+
+        for(char* LeftSynonym : LeftSynonyms)
+        {
+            std::set<char*>& LeftSynonymSynonyms = mItems[LeftSynonym];
+
+            for(char* RightSynonym : RightSynonyms)
             {
-                char* RightWord = FindOrCreateWord(Synonyms[RightIdx]);
-                if(strcmp(LeftWord, RightWord) != 0 &&
-                   LeftSynonymsSet.count(RightWord) == 0)
+                if(LeftSynonym != RightSynonym)
                 {
-                    if(!LeftSynonymsVectorFilled)
-                    {
-                         LeftSynonymsVector = {LeftSynonymsSet.begin(), LeftSynonymsSet.end()};
-                         LeftSynonymsVectorFilled = true;
-                    }
-
-                    std::set<char*>& RightSynonymsSet = mItems[RightWord];
-                    std::vector<char*> RightSynonymsVector = {RightSynonymsSet.begin(), RightSynonymsSet.end()};
-
-                    LeftSynonymsSet.insert(RightWord);
-                    for(char* LeftSynonym : LeftSynonymsVector)
-                    {
-                        std::set<char*>& LeftSynonymSynonymsSet = mItems[LeftSynonym];
-
-                        if(LeftSynonym != RightWord)
-                        {
-                            LeftSynonymSynonymsSet.insert(RightWord);
-
-                            RightSynonymsSet.insert(LeftSynonym);
-                        }
-
-                        for(char* RightSynonym : RightSynonymsVector)
-                        {
-                            if(LeftSynonym != RightSynonym)
-                            {
-                                LeftSynonymSynonymsSet.insert(RightSynonym);
-                            }
-                        }
-                    }
-
-                    RightSynonymsSet.insert(LeftWord);
-                    for(char* RightSynonym : RightSynonymsVector)
-                    {
-                        std::set<char*>& RightSynonymSynonymsSet = mItems[RightSynonym];
-
-                        if(RightSynonym != LeftWord)
-                        {
-                            RightSynonymSynonymsSet.insert(LeftWord);
-
-                            LeftSynonymsSet.insert(RightSynonym);
-                        }
-
-                        for(char* LeftSynonym : LeftSynonymsVector)
-                        {
-                            if(RightSynonym != LeftSynonym)
-                            {
-                                RightSynonymSynonymsSet.insert(LeftSynonym);
-                            }
-                        }
-                    }
+                    LeftSynonymSynonyms.insert(RightSynonym);
                 }
             }
+
+            if(LeftSynonym != RightWord)
+            {
+                LeftSynonymSynonyms.insert(RightWord);
+
+                RightSynonyms.insert(LeftSynonym);
+            }
         }
+
+        LeftSynonyms.insert(RightWord);
+
+        for(char* RightSynonym : RightSynonyms)
+        {
+            std::set<char*>& RightSynonymSynonyms = mItems[RightSynonym];
+
+            for(char* LeftSynonym : LeftSynonyms)
+            {
+                if(RightSynonym != LeftSynonym)
+                {
+                    RightSynonymSynonyms.insert(LeftSynonym);
+                }
+            }
+
+            if(RightSynonym != LeftWord)
+            {
+                RightSynonymSynonyms.insert(LeftWord);
+
+                LeftSynonyms.insert(RightSynonym);
+            }
+        }
+
+        RightSynonyms.insert(LeftWord);
     }
 }
 
