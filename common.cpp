@@ -120,7 +120,9 @@ ConvertStringToLowerCase(char* String)
     while(*At)
     {
         // TODO: SIMD this
-        *At = ToLowerCase(*At);
+
+        *At = (*At >= 'A' && *At <= 'Z') ? (*At - 'A' + 'a') : *At;
+
         At++;
     }
 }

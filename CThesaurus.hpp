@@ -25,4 +25,3 @@ public:
 private:
     std::unordered_map<std::string, std::set<std::string>> mItems;
 };
-

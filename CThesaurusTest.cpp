@@ -67,7 +67,7 @@ int main(int Argc, char** Argv)
     {
         CThesaurus Thesaurus;
 
-        std::vector<std::string> Synonyms = {"good", "Good", "gOoD"};
+        std::vector<std::string> Synonyms = {"good", "Good", "gOoD", "GOOD"};
 
         Thesaurus.AddSynonyms(&Synonyms);
 
@@ -75,6 +75,7 @@ int main(int Argc, char** Argv)
         AssertVectorsEqual(Thesaurus.GetSynonyms("good"), std::vector<std::string>());
         AssertVectorsEqual(Thesaurus.GetSynonyms("Good"), std::vector<std::string>());
         AssertVectorsEqual(Thesaurus.GetSynonyms("gOoD"), std::vector<std::string>());
+        AssertVectorsEqual(Thesaurus.GetSynonyms("GOOD"), std::vector<std::string>());
     }
 
     {
