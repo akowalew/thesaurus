@@ -1,4 +1,15 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdlib.h>
+#include <stdio.h>
+#include <string>
+#include <vector>
+#include <map>
+#include <unordered_map>
+#include <algorithm>
+#include <set>
 #include "common.cpp"
+#include "CThesaurus.hpp"
+#include "CThesaurus.cpp"
 
 static void
 AssertVectorsEqualCheck(std::vector<std::string>* A, std::vector<std::string> B, char* File, int Line, char* AExpr, char* BExpr)
@@ -51,6 +62,19 @@ int main(int Argc, char** Argv)
         AssertVectorsEqual(Thesaurus.GetSynonyms("good"), std::vector<std::string>({"fabolous", "great"}));
         AssertVectorsEqual(Thesaurus.GetSynonyms("great"), std::vector<std::string>({"fabolous", "good"}));
         AssertVectorsEqual(Thesaurus.GetSynonyms("fabolous"), std::vector<std::string>({"good", "great"}));
+    }
+
+    {
+        CThesaurus Thesaurus;
+
+        std::vector<std::string> Synonyms = {"good", "Good", "gOoD"};
+
+        Thesaurus.AddSynonyms(&Synonyms);
+
+        AssertVectorsEqual(Thesaurus.GetAllWords(), std::vector<std::string>({"good"}));
+        AssertVectorsEqual(Thesaurus.GetSynonyms("good"), std::vector<std::string>());
+        AssertVectorsEqual(Thesaurus.GetSynonyms("Good"), std::vector<std::string>());
+        AssertVectorsEqual(Thesaurus.GetSynonyms("gOoD"), std::vector<std::string>());
     }
 
     {
