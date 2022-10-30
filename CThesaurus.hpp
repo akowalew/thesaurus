@@ -33,5 +33,5 @@ public:
 private:
     char* FindOrCreateWord(char* Word);
 
-    std::map<char*, std::set<char*>, string_less> mItems;
+    std::map<char*, std::vector<char*>, string_less> mItems;
 };

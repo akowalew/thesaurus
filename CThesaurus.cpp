@@ -59,58 +59,53 @@ CThesaurus::AddSynonymsRaw(char** Synonyms, size_t Count)
         }
 
         char* RightWord = FindOrCreateWord(RightQuery);
+        std::vector<char*>& RightSynonyms = mItems[RightWord];
+        auto RightSize = RightSynonyms.size();
 
-        std::set<char*>& LeftSynonyms = mItems[LeftWord];
-        std::set<char*>& RightSynonyms = mItems[RightWord];
-
-        if(LeftSynonyms.count(RightWord))
+        if(std::count(RightSynonyms.begin(), RightSynonyms.end(), LeftWord))
         {
+            // Already synonyms
             continue;
         }
 
-        for(char* LeftSynonym : LeftSynonyms)
+        std::vector<char*>& LeftSynonyms = mItems[LeftWord];
+        auto LeftSize = LeftSynonyms.size();
+
+        for(size_t LeftIdx = 0;
+            LeftIdx < LeftSize;
+            LeftIdx++)
         {
-            std::set<char*>& LeftSynonymSynonyms = mItems[LeftSynonym];
+            char* LeftSynonym = LeftSynonyms[LeftIdx];
 
-            for(char* RightSynonym : RightSynonyms)
-            {
-                if(LeftSynonym != RightSynonym)
-                {
-                    LeftSynonymSynonyms.insert(RightSynonym);
-                }
-            }
+            std::vector<char*>& LeftSynonymSynonyms = mItems[LeftSynonym];
 
-            if(LeftSynonym != RightWord)
-            {
-                LeftSynonymSynonyms.insert(RightWord);
-
-                RightSynonyms.insert(LeftSynonym);
-            }
+            size_t LeftSynonymSynonymsSize = LeftSynonymSynonyms.size();
+            LeftSynonymSynonyms.resize(LeftSynonymSynonymsSize+1+RightSize);
+            LeftSynonymSynonyms[LeftSynonymSynonymsSize] = RightWord;
+            memcpy(&LeftSynonymSynonyms[LeftSynonymSynonymsSize+1], &RightSynonyms[0], RightSize*sizeof(char*));
         }
 
-        LeftSynonyms.insert(RightWord);
+        RightSynonyms.resize(RightSize+1+LeftSize);
+        RightSynonyms[RightSize] = LeftWord;
+        memcpy(&RightSynonyms[RightSize+1], &LeftSynonyms[0], LeftSize*sizeof(char*));
 
-        for(char* RightSynonym : RightSynonyms)
+        for(size_t RightIdx = 0;
+            RightIdx < RightSize;
+            RightIdx++)
         {
-            std::set<char*>& RightSynonymSynonyms = mItems[RightSynonym];
+            char* RightSynonym = RightSynonyms[RightIdx];
 
-            for(char* LeftSynonym : LeftSynonyms)
-            {
-                if(RightSynonym != LeftSynonym)
-                {
-                    RightSynonymSynonyms.insert(LeftSynonym);
-                }
-            }
+            std::vector<char*>& RightSynonymSynonyms = mItems[RightSynonym];
 
-            if(RightSynonym != LeftWord)
-            {
-                RightSynonymSynonyms.insert(LeftWord);
-
-                LeftSynonyms.insert(RightSynonym);
-            }
+            size_t RightSynonymSynonymsSize = RightSynonymSynonyms.size();
+            RightSynonymSynonyms.resize(RightSynonymSynonymsSize+1+LeftSize);
+            RightSynonymSynonyms[RightSynonymSynonymsSize] = LeftWord;
+            memcpy(&RightSynonymSynonyms[RightSynonymSynonymsSize+1], &LeftSynonyms[0], LeftSize*sizeof(char*));
         }
 
-        RightSynonyms.insert(LeftWord);
+        LeftSynonyms.resize(LeftSize+1+RightSize);
+        LeftSynonyms[LeftSize] = RightWord;
+        memcpy(&LeftSynonyms[LeftSize+1], &RightSynonyms[0], RightSize*sizeof(char*));
     }
 }
 
@@ -223,13 +218,9 @@ bool CThesaurus::ImportFromWordNetJson(char* FileName)
             }
 
             At = SynonymEnd + 1;
-
-            printf("%s ", SynonymBegin);
         }
 
         AddSynonymsRaw(Synonyms, SynonymsCount);
-
-        printf("\n");
 
         char* EndOfLineMarker = strchr(At, '\n');
         if(!EndOfLineMarker)
@@ -344,7 +335,7 @@ bool CThesaurus::SaveToBuffer(void* Data, size_t Size, size_t* BytesWritten)
         ItemAt++)
     {
         char* Word = ItemAt->first;
-        std::set<char*>& Synonyms = ItemAt->second;
+        std::vector<char*>& Synonyms = ItemAt->second;
 
         size_t M = Synonyms.size() + 1;
         if(M > 0xFF)

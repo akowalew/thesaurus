@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <algorithm>
 #include <set>
+#include <array>
+#include <chrono>
 #include "common.cpp"
 #include "CThesaurus.hpp"
 #include "CThesaurus.cpp"
@@ -195,6 +197,8 @@ main(int Argc, char** Argv)
             {
                 if(Command[1])
                 {
+                    auto start = std::chrono::steady_clock::now();
+
                     char* FileName = &Command[1];
                     if(Thesaurus.ImportFromWordNetJson(FileName))
                     {
@@ -204,6 +208,9 @@ main(int Argc, char** Argv)
                     {
                         puts("FAIL");
                     }
+
+                    auto stop = std::chrono::steady_clock::now();
+                    printf("Operation took %lld seconds\n", std::chrono::duration_cast<std::chrono::seconds>(stop - start).count());
                 }
             }
 
