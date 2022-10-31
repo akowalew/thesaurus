@@ -4,10 +4,7 @@
 #include <string>
 #include <vector>
 #include <map>
-#include <unordered_map>
-#include <algorithm>
 #include <set>
-#include <array>
 #include <chrono>
 #include "common.cpp"
 #include "CThesaurus.hpp"
@@ -36,8 +33,6 @@ Syntax is as below:
     WORD                   - Gets synonyms for given WORD
     +WORD1,WORD2,...       - Adds new synonyms
     *                      - Retrieves all stored words
-    <FILENAME              - Loads synonyms from FILENAME into program
-    >FILENAME              - Saves synonyms from program into FILENAME
     %FILENAME              - Imports synonyms from WordNet's JSON file
     ?                      - Prints this message
 )";
@@ -153,46 +148,6 @@ main(int Argc, char** Argv)
                 }
             } break;
 
-            case '>':
-            {
-                if(Command[1])
-                {
-                    char* FileName = &Command[1];
-                    if(Thesaurus.SaveToFile(FileName))
-                    {
-                        puts("OK");
-                    }
-                    else
-                    {
-                        puts("FAIL");
-                    }
-                }
-                else
-                {
-                    puts("Error: missing output filename");
-                }
-            } break;
-
-            case '<':
-            {
-                if(Command[1])
-                {
-                    char* FileName = &Command[1];
-                    if(Thesaurus.LoadFromFile(FileName))
-                    {
-                        puts("OK");
-                    }
-                    else
-                    {
-                        puts("FAIL");
-                    }
-                }
-                else
-                {
-                    puts("Error: missing input filename");
-                }
-            } break;
-
             case '%':
             {
                 if(Command[1])
@@ -200,7 +155,7 @@ main(int Argc, char** Argv)
                     auto start = std::chrono::steady_clock::now();
 
                     char* FileName = &Command[1];
-                    if(Thesaurus.ImportFromWordNetJson(FileName))
+                    if(ImportThesaurusFromWordNetJsonFile(&Thesaurus, FileName))
                     {
                         puts("OK");
                     }

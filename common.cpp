@@ -19,35 +19,6 @@ AssertCheck(bool Result, const char* File, int Line, const char* Expression)
 
 #define Assert(x) AssertCheck((x), __FILE__, __LINE__, #x)
 
-static void*
-ReadEntireFile(char* FileName, size_t* BytesRead)
-{
-    char* Result = 0;
-
-    FILE* File;
-    if(!fopen_s(&File, FileName, "rb"))
-    {
-        fseek(File, 0, SEEK_END);
-        int OffsetToEnd = ftell(File);
-        fseek(File, 0, SEEK_SET);
-
-        if(OffsetToEnd > 0)
-        {
-            size_t FileSize = (size_t) OffsetToEnd;
-            char* FileData = (char*)malloc(FileSize);
-            if(FileData)
-            {
-                *BytesRead = fread(FileData, 1, FileSize, File);
-                Result = FileData;
-            }
-        }
-
-        fclose(File);
-    }
-
-    return Result;
-}
-
 static char*
 ReadEntireFileAndNullTerminate(char* FileName, size_t* BytesRead)
 {
@@ -63,7 +34,7 @@ ReadEntireFileAndNullTerminate(char* FileName, size_t* BytesRead)
         if(OffsetToEnd > 0)
         {
             size_t FileSize = (size_t) OffsetToEnd;
-            char* FileData = (char*) malloc(FileSize+1);
+            char* FileData = new char[FileSize+1];
             if(FileData)
             {
                 size_t Count = fread(FileData, 1, FileSize, File);

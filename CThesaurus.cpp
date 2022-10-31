@@ -15,7 +15,7 @@ CThesaurus::FindOrCreateWord(char* Word)
     if(WordAt == mItems.end())
     {
         size_t WordLength = strlen(Word);
-        char* Result = (char*) malloc(WordLength + 1);
+        char* Result = new char[WordLength + 1];
         memcpy(Result, Word, WordLength+1);
 
         mItems[Result] = {};
@@ -45,71 +45,6 @@ CThesaurus::AddSynonymsRaw(char** Synonyms, size_t Count)
         ConvertStringToLowerCase(Synonyms[Idx]);
     }
 
-#ifdef SYNONYM_OF_ANOTHER_SYNONYM_IS_ALSO_A_SYNONYM_NOOOOO
-    char* LeftWord = FindOrCreateWord(Synonyms[0]);
-
-    for(size_t Idx = 1;
-        Idx < Count;
-        Idx++)
-    {
-        char* RightQuery = Synonyms[Idx];
-
-        if(strcmp(LeftWord, RightQuery) == 0)
-        {
-            continue;
-        }
-
-        char* RightWord = FindOrCreateWord(RightQuery);
-
-        std::vector<char*>& RightSynonyms = mItems[RightWord];
-        auto RightSize = RightSynonyms.size();
-
-        if(std::count(RightSynonyms.begin(), RightSynonyms.end(), LeftWord))
-        {
-            // Already synonyms
-            continue;
-        }
-
-        std::vector<char*>& LeftSynonyms = mItems[LeftWord];
-        auto LeftSize = LeftSynonyms.size();
-
-        for(size_t LeftIdx = 0;
-            LeftIdx < LeftSize;
-            LeftIdx++)
-        {
-            char* LeftSynonym = LeftSynonyms[LeftIdx];
-
-            std::vector<char*>& LeftSynonymSynonyms = mItems[LeftSynonym];
-
-            size_t LeftSynonymSynonymsSize = LeftSynonymSynonyms.size();
-            LeftSynonymSynonyms.resize(LeftSynonymSynonymsSize+1+RightSize);
-            LeftSynonymSynonyms[LeftSynonymSynonymsSize] = RightWord;
-            memcpy(&LeftSynonymSynonyms[LeftSynonymSynonymsSize+1], &RightSynonyms[0], RightSize*sizeof(char*));
-        }
-
-        RightSynonyms.resize(RightSize+1+LeftSize);
-        RightSynonyms[RightSize] = LeftWord;
-        memcpy(&RightSynonyms[RightSize+1], &LeftSynonyms[0], LeftSize*sizeof(char*));
-
-        for(size_t RightIdx = 0;
-            RightIdx < RightSize;
-            RightIdx++)
-        {
-            char* RightSynonym = RightSynonyms[RightIdx];
-
-            std::vector<char*>& RightSynonymSynonyms = mItems[RightSynonym];
-
-            size_t RightSynonymSynonymsSize = RightSynonymSynonyms.size();
-            RightSynonymSynonyms.resize(RightSynonymSynonymsSize+1+LeftSize);
-            RightSynonymSynonyms[RightSynonymSynonymsSize] = LeftWord;
-            memcpy(&RightSynonymSynonyms[RightSynonymSynonymsSize+1], &LeftSynonyms[0], LeftSize*sizeof(char*));
-        }
-
-        LeftSynonyms.resize(LeftSize+1+RightSize);
-        LeftSynonyms[LeftSize] = RightWord;
-        memcpy(&LeftSynonyms[LeftSize+1], &RightSynonyms[0], RightSize*sizeof(char*));
-    }
-#else
     for(size_t LeftIdx = 0;
         LeftIdx < Count;
         LeftIdx++)
@@ -135,25 +70,25 @@ CThesaurus::AddSynonymsRaw(char** Synonyms, size_t Count)
 
             char* RightWord = FindOrCreateWord(RightQuery);
 
-            std::vector<char*>& LeftSynonyms = mItems[LeftWord];
+            auto& LeftSynonyms = mItems[LeftWord];
 
-            if(std::count(LeftSynonyms.begin(), LeftSynonyms.end(), RightWord))
+            if(LeftSynonyms.count(RightWord))
             {
                 continue;
             }
 
-            std::vector<char*>& RightSynonyms = mItems[RightWord];
+            auto& RightSynonyms = mItems[RightWord];
 
-            RightSynonyms.push_back(LeftWord);
-            LeftSynonyms.push_back(RightWord);
+            RightSynonyms.insert(LeftWord);
+            LeftSynonyms.insert(RightWord);
         }
     }
-#endif
 }
 
 void
 CThesaurus::AddSynonyms(std::vector<std::string>* Synonyms)
 {
+    // NOTE: Just a helper - normally from app we use AddSynonymsRaw
     std::vector<char*> Vector(Synonyms->size());
     for(size_t Idx = 0;
         Idx < Synonyms->size();
@@ -173,9 +108,11 @@ CThesaurus::GetSynonymsRaw(char* Word)
     auto At = mItems.find(Word);
     if(At != mItems.end())
     {
+        auto& Synonyms = At->second;
+
         auto Result = new std::vector<std::string>();
-        Result->reserve(At->second.size());
-        for(char* Synonym : At->second)
+        Result->reserve(Synonyms.size());
+        for(char* Synonym : Synonyms)
         {
             Result->push_back(Synonym);
         }
@@ -205,17 +142,9 @@ CThesaurus::GetAllWords()
     return Result;
 }
 
-bool CThesaurus::ImportFromWordNetJson(char* FileName)
+bool ImportThesaurusFromWordNetJsonBuffer(CThesaurus* Thesaurus, char* Buffer)
 {
-    size_t FileSize;
-    char* FileData = (char*) ReadEntireFileAndNullTerminate(FileName, &FileSize);
-    if(!FileData)
-    {
-        // TODO: Logging
-        return false;
-    }
-
-    char* At = FileData;
+    char* At = Buffer;
 
     while(*At)
     {
@@ -285,7 +214,7 @@ bool CThesaurus::ImportFromWordNetJson(char* FileName)
             At = SynonymEnd + 1;
         }
 
-        AddSynonymsRaw(Synonyms, SynonymsCount);
+        Thesaurus->AddSynonymsRaw(Synonyms, SynonymsCount);
 
         char* EndOfLineMarker = strchr(At, '\n');
         if(!EndOfLineMarker)
@@ -300,193 +229,19 @@ bool CThesaurus::ImportFromWordNetJson(char* FileName)
     return true;
 }
 
-bool CThesaurus::LoadFromBuffer(void* Data, size_t Size)
+bool ImportThesaurusFromWordNetJsonFile(CThesaurus* Thesaurus, char* FileName)
 {
-    size_t Elapsed = Size;
-    char* At = (char*)Data;
-
-    if(Elapsed < sizeof(uint32_t))
-    {
-        // TODO: Logging
-        return false;
-    }
-
-    uint32_t N = *(uint32_t*)(At);
-    At += sizeof(uint32_t);
-    Elapsed -= sizeof(uint32_t);
-
-    for(size_t Row = 0;
-        Row < N;
-        Row++)
-    {
-        if(Elapsed < sizeof(uint32_t))
-        {
-            // TODO: Logging
-            return false;
-        }
-
-        uint32_t M = *(uint32_t*)(At);
-        At += sizeof(uint32_t);
-        Elapsed -= sizeof(uint32_t);
-
-        char* Synonyms[4096];
-
-        if(M > ArrayLength(Synonyms))
-        {
-            // TODO: Logging
-            return false;
-        }
-
-        for(size_t Col = 0;
-            Col < M;
-            Col++)
-        {
-            Synonyms[Col] = At;
-
-            printf("%s ", At);
-
-            char* WordEnd = (char*) memchr(At, '\0', Elapsed);
-            if(!WordEnd)
-            {
-                // TODO: Logging
-                return false;
-            }
-
-            Elapsed -= ((WordEnd + 1) - At);
-            At = WordEnd + 1;
-        }
-
-        printf("\n");
-
-        AddSynonymsRaw(Synonyms, M);
-    }
-
-    return true;
-}
-
-bool CThesaurus::LoadFromFile(char* FileName)
-{
-    bool Result = 0;
-
     size_t FileSize;
-    void* FileData = ReadEntireFile(FileName, &FileSize);
-    if(FileData)
-    {
-        if(LoadFromBuffer(FileData, FileSize))
-        {
-            Result = 1;
-        }
-
-        free(FileData);
-    }
-
-    return Result;
-}
-
-bool CThesaurus::SaveToBuffer(void* Data, size_t Size, size_t* BytesWritten)
-{
-    char* At = (char*) Data;
-    size_t Elapsed = Size;
-
-    size_t N = mItems.size();
-    if(N > 0xFFFFFFFF)
-    {
-        return false;
-    }
-
-    if(Elapsed < sizeof(uint32_t))
+    char* FileData = (char*) ReadEntireFileAndNullTerminate(FileName, &FileSize);
+    if(!FileData)
     {
         // TODO: Logging
         return false;
     }
 
-    *(uint32_t*)(At) = (uint32_t) N;
-    At += sizeof(uint32_t);
-    Elapsed -= sizeof(uint32_t);
+    bool Result = ImportThesaurusFromWordNetJsonBuffer(Thesaurus, FileData);
 
-    auto ItemsEnd = mItems.end();
-    for(auto ItemAt = mItems.begin();
-        ItemAt != ItemsEnd;
-        ItemAt++)
-    {
-        char* Word = ItemAt->first;
-        std::vector<char*>& Synonyms = ItemAt->second;
-
-        size_t M = Synonyms.size() + 1;
-        if(M > 0xFFFFFFFF)
-        {
-            // TODO: Logging
-            return false;
-        }
-
-        if(Elapsed < sizeof(uint32_t))
-        {
-            // TODO: Logging
-            return false;
-        }
-
-        *(uint32_t*)(At) = (uint32_t) M;
-        At += sizeof(uint32_t);
-        Elapsed -= sizeof(uint32_t);
-
-        size_t WordLength = strlen(Word);
-        if(Elapsed < WordLength)
-        {
-            // TODO: Logging
-            return false;
-        }
-
-        memcpy(At, Word, (WordLength+1));
-        At += (WordLength+1);
-        Elapsed -= (WordLength+1);
-
-        for(char* Synonym : Synonyms)
-        {
-            size_t SynonymLength = strlen(Synonym);
-            if(Elapsed < SynonymLength)
-            {
-                // TODO: Logging
-                return false;
-            }
-
-            memcpy(At, Synonym, (SynonymLength+1));
-            At += (SynonymLength+1);
-            Elapsed -= (SynonymLength+1);
-        }
-    }
-
-    *BytesWritten = (Size - Elapsed);
-
-    return true;
-}
-
-bool CThesaurus::SaveToFile(char* FileName)
-{
-    bool Result = 0;
-
-    size_t MaxFileSize = 1 * 1024 * 1024 * 1024;
-    void* FileData = malloc(MaxFileSize);
-    if(FileData)
-    {
-        size_t FileSize;
-        if(SaveToBuffer(FileData, MaxFileSize, &FileSize))
-        {
-            if(WriteEntireFile(FileName, FileData, FileSize))
-            {
-                Result = 1;
-            }
-        }
-        else
-        {
-            // TODO: Logging
-        }
-
-        free(FileData);
-    }
-    else
-    {
-        // TODO: Logging
-    }
+    delete[] FileData;
 
     return Result;
 }

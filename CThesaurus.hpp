@@ -15,25 +15,17 @@ public:
     ~CThesaurus();
 
     void AddSynonymsRaw(char** Synonyms, size_t Count);
-    void AddSynonymsVector(std::vector<char*>* Synonyms);
     std::vector<std::string>* GetSynonymsRaw(char* Word);
 
     void AddSynonyms(std::vector<std::string>* Synonyms);
     std::vector<std::string>* GetSynonyms(std::string Word);
     std::vector<std::string>* GetAllWords();
 
-    bool ImportFromWordNetJson(char* FileName);
-
-    bool LoadFromBuffer(void* Data, size_t Size);
-    bool SaveToBuffer(void* Data, size_t Size, size_t* BytesWritten);
-
-    bool LoadFromFile(char* FileName);
-    bool SaveToFile(char* FileName);
-
 private:
     char* FindOrCreateWord(char* Word);
 
-    using dictionary = std::map<char*, std::vector<char*>, string_less>;
-
-    dictionary mItems;
+    std::map<char*, std::set<char*>, string_less> mItems;
 };
+
+bool ImportThesaurusFromWordNetJsonBuffer(CThesaurus* Thesaurus, char* Buffer);
+bool ImportThesaurusFromWordNetJsonFile(CThesaurus* Thesaurus, char* FileName);
