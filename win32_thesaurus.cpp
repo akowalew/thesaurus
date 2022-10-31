@@ -28,6 +28,7 @@ FileExists(LPCTSTR szPath)
 }
 
 #define ListBox_GetCurSel(Handle) SendMessage(Handle, LB_GETCURSEL, 0, 0)
+#define ListBox_SelectString(Handle, Index, String) SendMessage(Handle, LB_SELECTSTRING, (WPARAM)Index, (LPARAM)String)
 
 #define StatusBar_SetText(Handle, Index, Text) SendMessage(Handle, SB_SETTEXT, Index, (LPARAM)Text)
 #define StatusBar_SetParts(Handle, Count, Coordinates) SendMessage(Handle, SB_SETPARTS, Count, (LPARAM)Coordinates)
@@ -111,7 +112,22 @@ WindowProc(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
 
                     Edit_GetText(WordEditHandle, Word, sizeof(Word));
 
-                    ChangeCurrentWord(Word);
+                    LRESULT Index = ListBox_SelectString(WordsListBoxHandle, 0, Word);
+
+                    if(Index != LB_ERR)
+                    {
+                        WordLength = ListBox_GetTextLen(WordsListBoxHandle, Index);
+
+                        Assert(WordLength < sizeof(Word));
+
+                        ListBox_GetText(WordsListBoxHandle, Index, Word);
+
+                        ChangeCurrentWord(Word);
+                    }
+                    else
+                    {
+                        StatusBar_SetText(StatusBarHandle, STATUSBAR_OVERALL_ID, "Word not found");
+                    }
                 }
             }
         } break;
@@ -214,9 +230,16 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PSTR CommandLine, INT Comman
     {
         int Y = Top;
 
+        int Length = HorizontalUnits*6;
+
+        CreateWindow(WC_STATIC, "Query: ",
+                     WS_CHILD | WS_VISIBLE,
+                     Margin, Y, Length, ControlHeight,
+                     WindowHandle, NULL, Instance, NULL);
+
         WordEditHandle = CreateWindow(WC_EDIT, "",
                                       WS_CHILD | WS_VISIBLE | WS_BORDER,
-                                      Margin, Y, ControlWidth, ControlHeight,
+                                      Margin+Length, Y, ControlWidth-Length, ControlHeight,
                                       WindowHandle, NULL, Instance, NULL);
         Assert(WordEditHandle);
 
