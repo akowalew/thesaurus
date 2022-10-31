@@ -27,8 +27,13 @@ FileExists(LPCTSTR szPath)
            !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY));
 }
 
-#define ListBox_GetCurSel(Handle) SendMessage(Handle, LB_GETCURSEL, 0, 0)
-#define ListBox_SelectString(Handle, Index, String) SendMessage(Handle, LB_SELECTSTRING, (WPARAM)Index, (LPARAM)String)
+#ifndef ListBox_GetCurSel
+# define ListBox_GetCurSel(Handle) SendMessage(Handle, LB_GETCURSEL, 0, 0)
+#endif
+
+#ifndef ListBox_SelectString
+# define ListBox_SelectString(Handle, Index, String) SendMessage(Handle, LB_SELECTSTRING, (WPARAM)Index, (LPARAM)String)
+#endif
 
 #define StatusBar_SetText(Handle, Index, Text) SendMessage(Handle, SB_SETTEXT, Index, (LPARAM)Text)
 #define StatusBar_SetParts(Handle, Count, Coordinates) SendMessage(Handle, SB_SETPARTS, Count, (LPARAM)Coordinates)
@@ -90,7 +95,7 @@ WindowProc(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
 
                     char Word[256];
 
-                    int WordLength = ListBox_GetTextLen(WordsListBoxHandle, WordIndex);
+                    size_t WordLength = (size_t) ListBox_GetTextLen(WordsListBoxHandle, WordIndex);
 
                     Assert(WordLength < sizeof(Word));
 
@@ -106,7 +111,7 @@ WindowProc(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
                 {
                     char Word[256];
 
-                    int WordLength = Edit_GetTextLength(WordEditHandle);
+                    size_t WordLength = (size_t) Edit_GetTextLength(WordEditHandle);
 
                     Assert(WordLength < sizeof(Word));
 
@@ -116,7 +121,7 @@ WindowProc(HWND Window, UINT Message, WPARAM WParam, LPARAM LParam)
 
                     if(Index != LB_ERR)
                     {
-                        WordLength = ListBox_GetTextLen(WordsListBoxHandle, Index);
+                        WordLength = (size_t) ListBox_GetTextLen(WordsListBoxHandle, Index);
 
                         Assert(WordLength < sizeof(Word));
 
@@ -162,7 +167,7 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PSTR CommandLine, INT Comman
     InitCommonControlsExStruct.dwICC = ICC_TAB_CLASSES;
     Assert(InitCommonControlsEx(&InitCommonControlsExStruct));
 
-    WNDCLASSA WindowsClass = {0};
+    WNDCLASSA WindowsClass = {};
     WindowsClass.lpfnWndProc = WindowProc;
     WindowsClass.hInstance = Instance;
     WindowsClass.lpszClassName = WindowClassName;
@@ -264,12 +269,15 @@ WinMain(HINSTANCE Instance, HINSTANCE PrevInstance, PSTR CommandLine, INT Comman
 
     if(!FileExists(FileName))
     {
+        // TODO: Small optimization - instead of checking if file exists,
+        // just open it and if succeeded - pass handle into Import function directly
+
         int UserChoice = MessageBoxA(WindowHandle, "Synonyms database file does not exist.\nWould you like to select other file?", "Thesaurus", MB_YESNO|MB_ICONQUESTION);
         if(UserChoice == IDYES)
         {
             FileName[0] = '\0';
 
-            OPENFILENAMEA OpenFileName = {0};
+            OPENFILENAMEA OpenFileName = {};
             OpenFileName.lStructSize = sizeof(OpenFileName);
             OpenFileName.hwndOwner = WindowHandle;
             OpenFileName.hInstance = GetModuleHandleA(0);

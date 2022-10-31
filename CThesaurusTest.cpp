@@ -1,7 +1,7 @@
 #include "common.cpp"
 
 static void
-AssertVectorsEqualCheck(std::vector<std::string>* A, std::vector<std::string> B, char* File, int Line, char* AExpr, char* BExpr)
+AssertVectorsEqualCheck(std::vector<std::string>* A, std::vector<std::string> B, const char* File, int Line, const char* AExpr, const char* BExpr)
 {
     std::set<std::string> AA = {A->begin(), A->end()};
     std::set<std::string> BB = {B.begin(), B.end()};

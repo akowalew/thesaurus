@@ -107,6 +107,8 @@ CThesaurus::GetSynonymsRaw(char* Word)
             Result->push_back(Synonym);
         }
 
+        std::sort(Result->begin(), Result->end());
+
         return Result;
     }
 

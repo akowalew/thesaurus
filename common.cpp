@@ -6,6 +6,8 @@
 #include <map>
 #include <set>
 #include <chrono>
+#include <algorithm>
+#include <string.h>
 
 #define ArrayLength(x) (sizeof(x)/sizeof((x)[0]))
 
@@ -13,7 +15,7 @@ static void AssertFailed(const char* File, int Line, const char* Expression)
 {
     fprintf(stderr, "Assert failed on %s:%d) %s is false\n", File, Line, Expression);
 
-    *(int*)(0) = 0;
+    *(volatile int*)(0) = 0;
 }
 
 static void

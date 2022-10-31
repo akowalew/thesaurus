@@ -1,6 +1,6 @@
 #include "common.cpp"
 
-constexpr char* HelpString =
+constexpr char const HelpString[] =
 R"(
 This program helps you finding synonyms for words
 Syntax is as below:
