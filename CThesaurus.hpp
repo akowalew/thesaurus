@@ -11,8 +11,8 @@ struct string_less
 class CThesaurus
 {
 public:
-    CThesaurus();
-    ~CThesaurus();
+    CThesaurus() = default;
+    ~CThesaurus() = default;
 
     void AddSynonymsRaw(char** Synonyms, size_t Count);
     std::vector<std::string>* GetSynonymsRaw(char* Word);

@@ -25,7 +25,7 @@ AssertCheck(bool Result, const char* File, int Line, const char* Expression)
     }
 }
 
-#define Assert(x) AssertCheck((x), __FILE__, __LINE__, #x)
+#define Assert(x) AssertCheck((bool)(x), __FILE__, __LINE__, #x)
 
 static char*
 ReadEntireFileAndNullTerminate(char* FileName, size_t* BytesRead)

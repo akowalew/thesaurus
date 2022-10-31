@@ -1,13 +1,3 @@
-CThesaurus::CThesaurus()
-{
-    // Do nothing
-}
-
-CThesaurus::~CThesaurus()
-{
-    // Do nothing
-}
-
 char*
 CThesaurus::FindOrCreateWord(char* Word)
 {
@@ -151,7 +141,7 @@ bool ImportThesaurusFromWordNetJsonBuffer(CThesaurus* Thesaurus, char* Buffer)
         char* Synonyms[512];
         size_t SynonymsCount = 0;
 
-        static const char WORD_MARKER[] = "\"word\": ";
+        static const char WORD_MARKER[] = "\"word\": \"";
         char* WordMarkerBegin = strstr(At, WORD_MARKER);
         if(!WordMarkerBegin)
         {
@@ -159,7 +149,7 @@ bool ImportThesaurusFromWordNetJsonBuffer(CThesaurus* Thesaurus, char* Buffer)
             return false;
         }
 
-        char* WordBegin = WordMarkerBegin + 1;
+        char* WordBegin = WordMarkerBegin + sizeof(WORD_MARKER) - 1;
         char* WordEnd = strchr(WordBegin, '"');
         if(!WordEnd)
         {
