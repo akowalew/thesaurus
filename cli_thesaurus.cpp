@@ -1,30 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
-#include <stdlib.h>
-#include <stdio.h>
-#include <string>
-#include <vector>
-#include <map>
-#include <set>
-#include <chrono>
 #include "common.cpp"
-#include "CThesaurus.hpp"
-#include "CThesaurus.cpp"
-
-static bool
-IsAlpha(char C)
-{
-    if((C >= 'a' &&
-        C <= 'z') ||
-       (C >= 'A' &&
-        C <= 'Z'))
-    {
-        return true;
-    }
-    else
-    {
-        return false;
-    }
-}
 
 constexpr char* HelpString =
 R"(

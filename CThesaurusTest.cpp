@@ -1,15 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
-#include <stdlib.h>
-#include <stdio.h>
-#include <string>
-#include <vector>
-#include <map>
-#include <unordered_map>
-#include <algorithm>
-#include <set>
 #include "common.cpp"
-#include "CThesaurus.hpp"
-#include "CThesaurus.cpp"
 
 static void
 AssertVectorsEqualCheck(std::vector<std::string>* A, std::vector<std::string> B, char* File, int Line, char* AExpr, char* BExpr)

@@ -1,7 +1,15 @@
+#define _CRT_SECURE_NO_WARNINGS
+#include <stdlib.h>
+#include <stdio.h>
+#include <string>
+#include <vector>
+#include <map>
+#include <set>
+#include <chrono>
+
 #define ArrayLength(x) (sizeof(x)/sizeof((x)[0]))
 
-static void
-AssertFailed(const char* File, int Line, const char* Expression)
+static void AssertFailed(const char* File, int Line, const char* Expression)
 {
     fprintf(stderr, "Assert failed on %s:%d) %s is false\n", File, Line, Expression);
 
@@ -97,3 +105,22 @@ ConvertStringToLowerCase(char* String)
         At++;
     }
 }
+
+static bool
+IsAlpha(char C)
+{
+    if((C >= 'a' &&
+        C <= 'z') ||
+       (C >= 'A' &&
+        C <= 'Z'))
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+#include "CThesaurus.hpp"
+#include "CThesaurus.cpp"
