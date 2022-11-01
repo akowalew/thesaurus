@@ -5,8 +5,8 @@ set FLAGS=-Wall -Wextra -Wpedantic -Wno-unused-function -Wno-unused-variable -Wn
 mkdir out >nul 2>nul
 copy en_thesaurus.json out\file.json
 pushd out
-g++ ..\win32_thesaurus.cpp %FLAGS%
-g++ ..\cli_thesaurus.cpp %FLAGS%
-g++ ..\CThesaurusTest.cpp %FLAGS%
+g++ ..\win32_thesaurus.cpp %FLAGS% -o win32_thesaurus.exe
+g++ ..\cli_thesaurus.cpp %FLAGS% -o cli_thesaurus.exe
+g++ ..\CThesaurusTest.cpp %FLAGS% -o CThesaurusTest.exe
 CThesaurusTest.exe
 popd
