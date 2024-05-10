@@ -1,5 +1,9 @@
 # Interview task - Thesaurus
 
+![image](https://github.com/akowalew/thesaurus/assets/11333571/09100574-8e1d-4e07-8862-ebcadeb0199a)
+
+![image](https://github.com/akowalew/thesaurus/assets/11333571/144412ef-6861-426a-aae2-6b4277aee33d)
+
 In this directory you can find implementation of interview task, which was to write implementation for provided Thesaurus class, add some unit tests and example applications.
 
 ## Build and run
@@ -14,7 +18,7 @@ Compilation is done using single-file-compilation-unit technique. In order to bu
 
 Initially the class provided had following body:
 
-```
+```c++
 #pragma once
 
 #include <vector>
